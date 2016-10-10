@@ -6,11 +6,10 @@ import (
 )
 
 const URL  = "amqp://121.14.28.232:5672"
-const QUEUE  = "http_nat_queue"
 
 func TestGet(t *testing.T) {
-	conn := CreateNatHttpConnection(URL, QUEUE)
-	res, err := conn.Get("https://baidu.com")
+	conn := CreateNatHttpConnection(URL)
+	res, err := conn.Get("https://tako.im/tako")
 	if err != nil {
 		panic(err)
 	}
@@ -18,11 +17,20 @@ func TestGet(t *testing.T) {
 }
 
 func TestAsyncGet(t *testing.T) {
-	conn := CreateNatAsyncHttpConnection(URL, QUEUE)
-	conn.AddGet("https://baidu.com")
-	conn.AddGet("http://www.qq.com/")
+	conn := CreateNatAsyncHttpConnection(URL)
+	conn.AddGet("https://tako.im/tako")
+	conn.AddGet("https://tako.im/takoios")
 	err := conn.Request()
 	if err != nil {
 		panic(err)
 	}
+}
+
+func TestPost(t *testing.T) {
+	conn := CreateNatHttpConnection(URL)
+	res, err := conn.Post("https://tako.im/service/login")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
 }

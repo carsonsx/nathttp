@@ -8,8 +8,12 @@ import (
 
 type NatAsyncHttpConnection struct {
 	qurl    string
-	qname   string
+	qreq    string
 	message *NatHttpRequestMessage
+}
+
+func (c *NatAsyncHttpConnection) SetRequestQueueName(name string) {
+	c.qreq = name
 }
 
 func (c *NatAsyncHttpConnection) getNextMessage() *NatHttpRequestMessage {
@@ -35,24 +39,60 @@ func (c *NatAsyncHttpConnection) AddGet(url string) {
 	c.getNextMessage().Url = url
 }
 
+func (c *NatAsyncHttpConnection) AddPost(url string) error {
+	return c.addJson(http.MethodPost, url, "")
+}
+
 func (c *NatAsyncHttpConnection) AddPostJson(url string, data interface{}) error {
+	return c.addJson(http.MethodPost, url, data)
+}
+
+func (c *NatAsyncHttpConnection) AddPostForm(url string, data map[string][]string) {
+	c.addForm(http.MethodPost, url, data)
+}
+
+func (c *NatAsyncHttpConnection) AddPut(url string) error {
+	return c.addJson(http.MethodPut, url, "")
+}
+
+func (c *NatAsyncHttpConnection) AddPutJson(url string, data interface{}) error {
+	return c.addJson(http.MethodPut, url, data)
+}
+
+func (c *NatAsyncHttpConnection) AddPutForm(url string, data map[string][]string) {
+	c.addForm(http.MethodPut, url, data)
+}
+
+func (c *NatAsyncHttpConnection) AddDelete(url string) error {
+	return c.addJson(http.MethodDelete, url, "")
+}
+
+func (c *NatAsyncHttpConnection) AddDeleteJson(url string, data interface{}) error {
+	return c.addJson(http.MethodDelete, url, data)
+}
+
+func (c *NatAsyncHttpConnection) AddDeleteForm(url string, data map[string][]string) {
+	c.addForm(http.MethodDelete, url, data)
+}
+
+func (c *NatAsyncHttpConnection) addJson(method, url string, data interface{}) error {
 	if url == "" {
 		return nil
 	}
 	m := c.getNextMessage()
-	m.Method = http.MethodPost
+	m.Method = method
 	m.Url = url
 	var err error
 	m.JsonData, err = GetJsonString(data)
 	return err
 }
 
-func (c *NatAsyncHttpConnection) AddPostForm(url string, data map[string][]string) {
+func (c *NatAsyncHttpConnection) addForm(method, url string, data map[string][]string) {
 	if url == "" {
 		return
 	}
 	message := c.getNextMessage()
-	message.Method = http.MethodPost
+	message.Method = method
 	message.Url = url
 	message.FormData = data
 }
@@ -73,7 +113,7 @@ func (c *NatAsyncHttpConnection) Request() error {
 	}
 	return ch.Publish(
 		"",      // exchange
-		c.qname, // routing key
+		c.qreq, // routing key
 		false,   // mandatory
 		false,   // immediate
 		amqp.Publishing{

@@ -8,8 +8,17 @@ import (
 )
 
 type NatHttpConnection struct {
-	qurl  string
-	qname string
+	qurl string
+	qreq string
+	qres string
+}
+
+func (c *NatHttpConnection) SetRequestQueueName(name string) {
+	c.qreq = name
+}
+
+func (c *NatHttpConnection) SetResponseQueueName(name string) {
+	c.qres = name
 }
 
 func (c *NatHttpConnection) Get(url string) (string, error) {
@@ -19,11 +28,47 @@ func (c *NatHttpConnection) Get(url string) (string, error) {
 	return c.Request(message)
 }
 
+func (c *NatHttpConnection) Post(url string) (string, error) {
+	return c.sendJson(http.MethodPost, url, "")
+}
+
 func (c *NatHttpConnection) PostJson(url string, data interface{}) (string, error) {
+	return c.sendJson(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) PostForm(url string, data map[string][]string) (string, error) {
+	return c.sendForm(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) Put(url string) (string, error) {
+	return c.sendJson(http.MethodPost, url, "")
+}
+
+func (c *NatHttpConnection) PutJson(url string, data interface{}) (string, error) {
+	return c.sendJson(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) PutForm(url string, data map[string][]string) (string, error) {
+	return c.sendForm(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) Delete(url string) (string, error) {
+	return c.sendJson(http.MethodPost, url, "")
+}
+
+func (c *NatHttpConnection) DeleteJson(url string, data interface{}) (string, error) {
+	return c.sendJson(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) DeleteForm(url string, data map[string][]string) (string, error) {
+	return c.sendForm(http.MethodPost, url, data)
+}
+
+func (c *NatHttpConnection) sendJson(method, url string, data interface{}) (string, error) {
 	var message NatHttpRequestMessage
 	message.Sync = true
 	message.Url = url
-	message.Method = http.MethodPost
+	message.Method = method
 	jsonData, err := GetJsonString(data)
 	if err != nil {
 		return "", err
@@ -32,14 +77,16 @@ func (c *NatHttpConnection) PostJson(url string, data interface{}) (string, erro
 	return c.Request(message)
 }
 
-func (c *NatHttpConnection) PostForm(url string, data map[string][]string) (string, error) {
+func (c *NatHttpConnection) sendForm(method, url string, data map[string][]string) (string, error) {
 	var message NatHttpRequestMessage
 	message.Sync = true
 	message.Url = url
-	message.Method = http.MethodPost
+	message.Method = method
 	message.FormData = data
 	return c.Request(message)
 }
+
+
 
 func (c *NatHttpConnection) Request(message NatHttpRequestMessage) (res string, err error) {
 	conn, err := amqp.Dial(c.qurl)
@@ -57,10 +104,9 @@ func (c *NatHttpConnection) Request(message NatHttpRequestMessage) (res string, 
 	}
 
 	corrId := uuid.NewV4().String()
-	callback := c.qname + "_callback"
 
 	msgs, err := ch.Consume(
-		callback, // queue
+		c.qres, // queue
 		"",             // consumer
 		true,           // auto-ack
 		false,          // exclusive
@@ -72,13 +118,13 @@ func (c *NatHttpConnection) Request(message NatHttpRequestMessage) (res string, 
 
 	err = ch.Publish(
 		"",      // exchange
-		c.qname, // routing key
+		c.qreq, // routing key
 		false,   // mandatory
 		false,   // immediate
 		amqp.Publishing{
 			ContentType:   "text/plain",
 			CorrelationId: corrId,
-			ReplyTo:       callback,
+			ReplyTo:       c.qres,
 			Body:          body,
 		})
 	failOnError(err, "Failed to publish a message")

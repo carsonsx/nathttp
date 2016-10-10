@@ -5,6 +5,11 @@ import (
 	"net/url"
 )
 
+const (
+	nat_http_request = "nat_http_request"
+	nat_http_response = "nat_http_response"
+)
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -20,16 +25,17 @@ type NatHttpRequestMessage struct {
 	Next     *NatHttpRequestMessage `json:"next"`
 }
 
-func CreateNatHttpConnection(qurl, qname string) *NatHttpConnection {
+func CreateNatHttpConnection(qurl string) *NatHttpConnection {
 	return &NatHttpConnection{
 		qurl:  qurl,
-		qname: qname,
+		qreq: nat_http_request,
+		qres: nat_http_response,
 	}
 }
 
-func CreateNatAsyncHttpConnection(qurl, qname string) *NatAsyncHttpConnection {
+func CreateNatAsyncHttpConnection(qurl string) *NatAsyncHttpConnection {
 	return &NatAsyncHttpConnection{
 		qurl: qurl,
-		qname: qname,
+		qreq: nat_http_request,
 	}
 }
