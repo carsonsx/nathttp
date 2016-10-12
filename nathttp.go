@@ -23,6 +23,7 @@ type NatHttpRequestMessage struct {
 	FormData url.Values             `json:"formData"`
 	Sync     bool                   `json:"sync"`
 	Next     *NatHttpRequestMessage `json:"next"`
+	Error    *NatHttpRequestMessage `json:"error"`
 }
 
 func CreateNatHttpConnection(qurl string) *NatHttpConnection {
