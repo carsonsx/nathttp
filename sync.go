@@ -41,27 +41,27 @@ func (c *NatHttpConnection) PostForm(url string, data map[string][]string) (stri
 }
 
 func (c *NatHttpConnection) Put(url string) (string, error) {
-	return c.sendJson(http.MethodPost, url, "")
+	return c.sendJson(http.MethodPut, url, "")
 }
 
 func (c *NatHttpConnection) PutJson(url string, data interface{}) (string, error) {
-	return c.sendJson(http.MethodPost, url, data)
+	return c.sendJson(http.MethodPut, url, data)
 }
 
 func (c *NatHttpConnection) PutForm(url string, data map[string][]string) (string, error) {
-	return c.sendForm(http.MethodPost, url, data)
+	return c.sendForm(http.MethodPut, url, data)
 }
 
 func (c *NatHttpConnection) Delete(url string) (string, error) {
-	return c.sendJson(http.MethodPost, url, "")
+	return c.sendJson(http.MethodDelete, url, "")
 }
 
 func (c *NatHttpConnection) DeleteJson(url string, data interface{}) (string, error) {
-	return c.sendJson(http.MethodPost, url, data)
+	return c.sendJson(http.MethodDelete, url, data)
 }
 
 func (c *NatHttpConnection) DeleteForm(url string, data map[string][]string) (string, error) {
-	return c.sendForm(http.MethodPost, url, data)
+	return c.sendForm(http.MethodDelete, url, data)
 }
 
 func (c *NatHttpConnection) sendJson(method, url string, data interface{}) (string, error) {

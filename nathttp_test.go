@@ -9,7 +9,7 @@ const URL  = "amqp://121.14.28.232:5672"
 
 func TestGet(t *testing.T) {
 	conn := CreateNatHttpConnection(URL)
-	res, err := conn.Get("https://tako.im/tako")
+	res, err := conn.Get("https://tako.im/service/openapi/app/uri?uri=tako")
 	if err != nil {
 		panic(err)
 	}
@@ -18,8 +18,8 @@ func TestGet(t *testing.T) {
 
 func TestAsyncGet(t *testing.T) {
 	conn := CreateNatAsyncHttpConnection(URL)
-	conn.AddGet("https://tako.im/tako")
-	conn.AddGet("https://tako.im/takoios")
+	conn.AddGet("https://tako.im/service/openapi/app/uri?uri=tako")
+	conn.AddGet("https://tako.im/service/openapi/app/uri?uri=takoios")
 	err := conn.Request()
 	if err != nil {
 		panic(err)

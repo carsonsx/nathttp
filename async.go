@@ -106,8 +106,7 @@ func (c *NatAsyncHttpConnection) Request() error {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	var body []byte
-	body, err = json.Marshal(c.message)
+	body, err := json.Marshal(c.message)
 	if err != nil {
 		return err
 	}
